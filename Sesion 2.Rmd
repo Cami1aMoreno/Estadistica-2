@@ -1,0 +1,165 @@
+---
+title: "**Sesión 2. Lectura de datos I**"
+subtitle: "Curso: POL304 - Estadística para el análisis político 2"
+author: "Jefes de práctica: Wendy Adrianzén, Gabriel Ramos"
+date: "Ciclo 2021-2"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r,echo=FALSE, out.width="40%",fig.align="center"}
+knitr::include_graphics("logoPUCP.png") 
+```
+
+# **1. Data frames**
+
+Los data frame se usan para almacenar datos en forma de tablas (filas / columnas), como estamos habituados en Excel, Spss, etc.
+
+Los data frame pueden almacenar objetos/datos de distinto tipo: numéricos, carácter, etc. Normalmente los data frame los creamos al cargar/leer una base de datos, sin embargo podemos crear un data frame desde R para ver su estructura.
+
+```{r}
+presupuesto2021 = data.frame( prioridad= c("reactivación", "educación", "salud", "mujer","pobreza"),
+                              monto_millones = c(9879, 33132, 20991, 690, 5392))
+```
+
+Examinemos algunas características básicas del data frame:
+
+```{r}
+class(presupuesto2021) #clase del objeto
+nrow(presupuesto2021) #número de filas (casos)
+ncol(presupuesto2021) #número de columnas (variables)
+dim(presupuesto2021) #número de filas (casos) y columnas (variables) 
+str (presupuesto2021) #estructura 
+names(presupuesto2021) #nombre de las variables 
+head(presupuesto2021) #nos muestra las primeras 6 observaciones de la data
+tail(presupuesto2021) #nos muestra las 6 últimas observaciones de la data
+```
+
+Para acceder a los elementos de un data frame utilizamos los símbolos $ o [].
+Si queremos seleccionar la variable "monto_millones" de nuestro data frame:
+
+```{r}
+presupuesto2021$monto_millones #opción 1
+presupuesto2021[2] #opción 2
+```
+
+Si trabajamos con un data frame, para no tener que acceder a una variable utilizando la expresión objeto$variable, que a veces resulta engorroso, puede hacerse un attach al objeto. Esto nos permitirá acceder directamente a las variables de la base de datos por su nombre.
+
+```{r}
+attach(presupuesto2021)
+monto_millones # ahora puedo acceder directamente a las variables por su nombre
+prioridad
+```
+
+# **2. Cargar datos de 'proprietary software' en R**
+
+![](datos.png)
+
+R nos permite abrir archivos en diversas extensiones. Algunos que usaremos en este curso son las siguientes:
+
+| Extensión | Tipo de archivo              |
+|-----------|------------------------------|
+| rda o RData      | Archivo en formato R         |
+| csv       | Archivo delimitado por comas |
+| xls       | Archivo en formato Excel     |
+| sav       | Archivo en formato SPSS      |
+| dta       | Archivo en formato STATA     |
+| JSON       | JavaScript Object Notation     |
+| XML       | Extensible Markup Language     |
+
+Los datos pueden estar en algun lugar de la web; si crees que esos datos permanecerán en ese sitio, quizás puedas sólo utilizar su link de descarga y leerlos directamente. Lo más seguro, en todo caso, es usarlos de esa manera y luego guardar esa data en tu **repositorio** del proyecto (en la ‘nube’). Esto facilitará su lectura y **replicabilidad**.
+
+Si por alguna razón deseas leerlos desde tu computadora, debes tener los archivos en la misma carpeta de tu R Markdown, R Notebook.
+
+Para cargar archivos de distintos formatos debemos cargar el paquete "rio". La libreria "rio" es muy versatil y permite importar datos en distintos formatos con el comendo **import()**
+
+Instalamos el paquete (por si no lo tienen), utilizando el siguiente comando:**install.packages("rio")**
+
++ **Leyendo STATA**
+
+La encuesta LAPOP está en la web. Varios años son de libre acceso, pero podemos guardar una copia en GitHub, y leer esa copia desde ahí:
+
+```{r}
+library(rio)
+lkDTA="https://github.com/PoliticayGobiernoPUCP/estadistica_anapol2/raw/master/DATA/lapop2012.dta"
+dataStata=import(lkDTA)
+```
+
+Toda data debe tener una guía metodológica o una descripción de las columnas (metadata) en su web original. Es bueno copiar y mantener una copia de esos materiales en tu proyecto.
+
++ **Leyendo SPSS**
+
+Abramos el mismo archivo de LAPOP, pero en SPSS:
+
+```{r}
+lkSAV="https://github.com/PoliticayGobiernoPUCP/estadistica_anapol2/raw/master/DATA/lapop2012.sav"
+dataSpss=import(lkSAV)
+```
+
++ **Leyendo Excel**
+
+El mismo archivo, pero en EXCEL:
+
+```{r}
+lkXLSX="https://github.com/PoliticayGobiernoPUCP/estadistica_anapol2/raw/master/DATA/lapop2012.xlsx"
+dataExcel=import(lkXLSX)
+```
+
++ **Leyendo CSV**
+
+Recuerden que un archivo csv es delimitado por comas, sin embargo, siempre verifiquen cual es el separador de su ordenador. Si la data está en CSV, podemos usar rio, y también la función del R básico:
+
+```{r}
+lkCSV="https://github.com/PoliticayGobiernoPUCP/estadistica_anapol2/raw/master/DATA/lapop2012.csv"
+dataCSV=import(lkCSV)
+```
+
+Otra forma:
+
+```{r}
+lapop=read.csv("https://github.com/PoliticayGobiernoPUCP/estadistica_anapol2/raw/master/DATA/lapop2012.csv",                 # Nombre del archivo o ruta completa del archivo
+         header = TRUE,        # Leer el encabezado (TRUE) o no (FALSE)
+         sep = ",",            # Separador de los valores
+         quote = "\"",         # Caracter de citaciones
+         dec = ".",            # Punto decimal
+         fill = TRUE,          # Rellenar celdas vacías (TRUE) o no (FALSE)
+         comment.char = "",    # Carácter de los comentarios o cadenas vacías
+         encoding = "unknown") # Codificación del archivo
+```
+
++   **Archivos de GoogleDoc**
+
+Podemos muchas veces usar los formularios de Google Docs para recoger información. Estos formularios dejan la información en una hoja de calculo de google (GoogleSheet). Si Ud publica esa data como archivo tipo CSV, use el comando **read.csv**.
+
+Ejemplo:
+
+```{r}
+lkDOC=("https://docs.google.com/spreadsheets/d/e/2PACX-1vSlVNHf9HmiU27DGrafIQCtpWcuqRp4w_GUQNE8RwSdTt7OH3TaGhkQd5v1xVKpW6vDRUNX0eBJh2Pk/pub?gid=773718740&single=true&output=csv")
+dataDOC=read.csv(lkDOC)
+```
+
++   **Archivos de Datos Espaciales**
+
+En en este link: (https://app.box.com/s/mdcqfue3u0wis0b3v4gy0kwcjv4e0amu) encontrarás una carpeta comprimida. Al descomprimirla, encontraras varios tipos de archivos con el mismo nombre. Eso constituye un mapa en formato SHAPEFILE. Los shapefiles tienen muchos archivos de subcomponentes, cada uno con una extensión de archivo diferente. Un archivo tendrá la extensión ".shp", pero otros pueden tener ".dbf", ".prj", etc. 
+Es difícil que R lea este mapa, por lo que debes convertirlo a formato topojson.
+
+Cambie el mapa a formato JSON. Para ello vaya al mapshaper(https://mapshaper.org/); desde ahí, suba los archivos de la carpeta, simplifíquelo, y luego exportelo como topojson. Luego, suba el archivo topojson a Github; guarde el link de descarga del archivo subido; y ábralo en R así:
+
+**instale los paquetes "sp" y "rgdal"**
+
+```{r}
+library(sp)
+library(rgdal)
+
+fromGit=("https://github.com/gabrielramost/Estadistica2/blob/main/seattle.json?raw=true") #link desde github
+
+wazipMap <- rgdal::readOGR(fromGit,stringsAsFactors = FALSE)
+plot(wazipMap)
+```
+
+# **EJERCICIO**. 
+
++ Cree un formulario de Google con mínimo 5 preguntas que recoja información sobre algún tema de ciencia política de su interés. Aplíquelo por lo menos a 15 personas. 
++ Descargue los archivos en R
++ Realice un análisis descriptivo utilizando las variables que considere.
