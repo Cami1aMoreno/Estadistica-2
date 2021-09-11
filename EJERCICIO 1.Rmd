@@ -1,0 +1,116 @@
+---
+title: "Ejercicio 1"
+output: html_document
+---
+
+# **1. Presentación**
+##Objetivo
+El objetivo de este breve formulario es para conocer la opión de los ciudadanos en relación al proceso de vacunación que viene realizando el Ministerio de Salud.
+
+##Cargar y modificar datos
+En ese sentido, se abrirá el siguiente data frame denominado ENCUESTA, en el cual se muestran los resultado del cuestionario.
+```{r}
+lkDOC = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCjeh1xm4tJquLrBVbEvCzIhGZg4zh3or7O1Z6pYtcYlEoopB931ytUx9XjbsIjoQaOUBFiBNHDlxA/pub?output=csv"
+ENCUESTA = read.csv(lkDOC, encoding="UTF-8")
+##eliminar las columnas innecesarias
+ENCUESTA$Marca.temporal <- NULL
+ENCUESTA$Puntuación <- NULL
+```
+
+Observaremos algunas características de las variables
+```{r}
+names(ENCUESTA) <- c("Satisfacción", "Vacuna Escalonada", "Disposición", "Marca", "Lugares")
+str(ENCUESTA)
+```
+
+Observamos que muchas de las variables que consideramos categóricas son consideradas como caracteres o integer. Entonces, pasaremos a modificar su correcta condición.
+```{r}
+##Convertir a variable categórica ordinal
+ENCUESTA$Satisfacción <- as.numeric(ENCUESTA$Satisfacción)
+ENCUESTA$Satisfacción <- ordered(ENCUESTA$Satisfacción)
+levels(ENCUESTA$Satisfacción) <- c ("Nada satisfecho","Poco satisfecho", "Satisfecho", "Muy satisfecho")
+table(ENCUESTA$Satisfacción)
+
+##convertir a variable categórica
+ENCUESTA$`Vacuna Escalonada`<- as.factor(ENCUESTA$`Vacuna Escalonada`)
+
+##convertir a variable factor
+ENCUESTA$Disposición <- as.factor(ENCUESTA$Disposición)
+
+##convertir a variable categórica numérica (dummy)
+ENCUESTA$Marca <- as.factor(ENCUESTA$Marca)
+
+##convertir a varible categórica nominal
+ENCUESTA$Lugares <- as.numeric(ENCUESTA$Lugares)
+
+str(ENCUESTA)
+```
+
+# **Ejercicio**
+Una vez identificadas las variables pasaremos a realizar un análisis descriptivo; es decir, utilizaremos las medidas de tendencia central y gràficos para una mayor comprensón. 
+```{r}
+##Variable Satisfacción
+library(DescTools)
+Mode(ENCUESTA$Satisfacción)
+Median(ENCUESTA$Satisfacción)
+table(ENCUESTA$Satisfacción)
+prop.table(table(ENCUESTA$Satisfacción))*100
+
+library(ggplot2)
+color = c("green", "red", "blue", "yellow")
+ggplot(ENCUESTA, aes(x = Satisfacción)) + geom_bar(fill = color) + labs(title = "¿Què tan satisfecho estás con el proceso de vacunaión?", x = "Nivel de satisfacción", y = "Frecuencia")
+```
+De los resultados se puede observar que la mayoría de las personas encuestadas están satisfechas con el proceso de vacunación que viene realizando el Ministerio de Salud.
+```{r}
+##Variable Vacuna Escalonada 
+Mode(ENCUESTA$`Vacuna Escalonada`)
+table(ENCUESTA$`Vacuna Escalonada`)
+prop.table(table(ENCUESTA$`Vacuna Escalonada`))*100
+
+library(plotrix)
+datos <- c(55.56, 44.44)
+pielabels = c("No", "Sí")
+pie3D(datos, labels = pielabels,explode=0.1, col = 2:3, labelcol = "black", main ="¿Estarías de acuerdo que se elimine la vacunación escalonada?")
+```
+En relación con el resultado anterior, un 55.56% no esta de acuerdo que se elimine la programación escalonada de la vacunación. Entonces, se puede inferir que debido a esta estrategia las personas esten satisfechas con el proceso de vacunación.
+
+```{r}
+##Variable Disposición
+library(DescTools)
+Mode(ENCUESTA$Disposición)
+table(ENCUESTA$Disposición)
+prop.table(table(ENCUESTA$Disposición))*100
+
+library(ggplot2)
+color2 = c("light blue", "pink", "purple")
+ggplot(ENCUESTA, aes(x = Disposición)) + geom_bar(fill = color2) + labs(title = "¿Estarías dispuesto a vacunarte contra la COVID-19", x = "Disposición", y = "Frecuencia")
+```
+Asimismo, una abrumadora mayoría esta dispuesta a vacunarse contra la COVID -19. Sin embargo, unas cuantas personas están en dudas de tomar esta decisión por diversos motivos. Puede ser por la falta de información entorno a este tema, religión, miedo, etc. Se tendría que profundizar cuales son sus dudas.
+```{r}
+##Variable Marca
+Mode(ENCUESTA$Marca)
+table(ENCUESTA$Marca)
+prop.table(table(ENCUESTA$Marca))*100
+
+library(plotrix)
+datos2 <- c(42.86, 57.14)
+pielabels2 = c("No", "Sí")
+pie3D(datos2, labels = pielabels2, explode=0.1, col = 4:5, labelcol = "black", main ="¿Es importante la marca de la vacuna?")
+```
+Por otro lado, un tema que estos meses ha sido muy polémico es alrededor de las marcas de las vacunas. En ese sentido, se le pregunta a las personas y más de la mitad (57.14%) señalaron que si es relevante la marca de las vacunas al momento de inmunizarse.
+```{r}
+##Varible Lugares
+library(psych)
+describeBy(ENCUESTA$Lugares)
+Mode(ENCUESTA$Lugares)
+
+library(ggplot2)
+ggplot(data = ENCUESTA, aes(x = Lugares)) +
+geom_boxplot(aes(color = "Lugares"), varwidth = TRUE, outlier.colour = "blue") +
+theme_minimal() +
+xlab("Número de centros de vacunación") +
+ylab("Porcentaje") +
+ggtitle("¿Cuántos centros de vacunacón hay cerca a su domicilio? ")
+```
+Por último, los resultados arrojaron que en promedio las personas cuentan con 2 centros de vacunación cerca a su domicilio. Por lo que este se podría descartar como un problema para que los ciudadanos vayan a vacunarse.
+
